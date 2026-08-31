@@ -9,8 +9,11 @@ async function bootstrap() {
   const config = app.get<AppConfig>(APP_CONFIG);
   app.enableShutdownHooks();
 
-  const logger = await app.resolve(PinoLogger);
+  const logger = await app.resolve<PinoLogger>(PinoLogger);
   logger.setContext('Bootstrap');
+
+  await app.listen(config.port);
+
   logger.info(
     {
       event: 'api_started',
@@ -18,8 +21,6 @@ async function bootstrap() {
     },
     'Stack Trace API started',
   );
-
-  await app.listen(config.port);
 }
 
 void bootstrap().catch((error: unknown) => {

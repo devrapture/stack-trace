@@ -14,8 +14,8 @@ async function runDoctorCommand() {
 
   app.enableShutdownHooks();
 
-  const logger = await app.resolve(PinoLogger);
-  logger.setContext('bootstrap worker');
+  const logger = await app.resolve<PinoLogger>(PinoLogger);
+  logger.setContext('bootstrap cli');
 
   logger.info(
     {

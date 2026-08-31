@@ -13,7 +13,7 @@ async function bootstrapWorker() {
   app.flushLogs();
   app.enableShutdownHooks();
 
-  const logger = await app.resolve(PinoLogger);
+  const logger = await app.resolve<PinoLogger>(PinoLogger);
   logger.setContext('bootstrap worker');
 
   logger.info(

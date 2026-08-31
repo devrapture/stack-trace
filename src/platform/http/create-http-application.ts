@@ -38,7 +38,7 @@ export const createHttpApplication =
 
     app.useLogger(app.get(PinoNestLogger));
 
-    const logger = await app.resolve(PinoLogger);
+    const logger = await app.resolve<PinoLogger>(PinoLogger);
     logger.setContext('httpAccessLog');
 
     const runtimeConfig = app.get(APP_CONFIG);
