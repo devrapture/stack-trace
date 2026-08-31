@@ -1,13 +1,28 @@
 import { NestFactory } from '@nestjs/core';
 import { CliModule } from './cli.module.js';
+import { PinoLogger, Logger as PinoNestLogger } from 'nestjs-pino';
 import { formatFatalError } from '../platform/errors/format-fatal-error.js';
 
 async function runDoctorCommand() {
   const app = await NestFactory.createApplicationContext(CliModule, {
-    logger: false,
+    bufferLogs: true,
   });
 
+  app.useLogger(app.get(PinoNestLogger));
+
+  app.flushLogs();
+
   app.enableShutdownHooks();
+
+  const logger = await app.resolve(PinoLogger);
+  logger.setContext('bootstrap worker');
+
+  logger.info(
+    {
+      event: 'cli_dependency_graph_verified',
+    },
+    'Stack Trace CLI dependency graph started successfully',
+  );
 
   process.stdout.write(
     'Stack Trace worker application context started successfully.\n',
