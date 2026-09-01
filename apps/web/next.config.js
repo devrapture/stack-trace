@@ -8,6 +8,7 @@ import './src/env.js';
 const config = {
   transpilePackages: ['shared-types'],
   allowedDevOrigins: ['web.localhost', '*.web.localhost'],
+  output: 'standalone',
 };
 
 export default config;

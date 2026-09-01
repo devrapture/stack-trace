@@ -1,0 +1,51 @@
+# syntax=docker/dockerfile:1
+FROM oven/bun:1 AS build
+WORKDIR /repo
+
+# Copy the whole monorepo so bun resolves all workspaces from the lockfile
+COPY package.json bun.lock turbo.json ./
+COPY apps ./apps
+COPY packages ./packages
+
+# Install every workspace exactly as lockfile pins
+RUN bun install --frozen-lockfile
+
+# Build shared-types first (api consumes it via workspace:*)
+RUN bun run --filter shared-types build
+
+# Build the API
+RUN bun run --filter api build
+
+# Prune to production-only dependencies so the runtime store is slim (build-time
+# tooling like nest-cli/typescript are excluded from the shipped image).
+RUN bun install --production --frozen-lockfile
+
+FROM node:24-alpine AS runner
+WORKDIR /app
+
+ENV NODE_ENV=production
+ENV PORT=80
+
+RUN addgroup --system --gid 1001 nodejs \
+  && adduser --system --uid 1001 nodejs \
+  && mkdir -p /node_modules
+
+# Built API output
+COPY --from=build /repo/apps/api/dist ./dist
+COPY --from=build /repo/apps/api/package.json ./package.json
+
+# Bun keeps dependencies in a virtual store and exposes them through relative
+# symlinks of the form ../../../node_modules/.bun/<pkg>/node_modules/<pkg>.
+# From /app/node_modules those resolve to /node_modules/.bun, so place the store
+# at the container root and copy the app's node_modules preserving its symlinks.
+COPY --from=build /repo/node_modules/.bun /node_modules/.bun
+COPY --from=build /repo/apps/api/node_modules/ /app/node_modules/
+
+# The shared-types workspace is referenced via a relative symlink to
+# /packages/shared-types; materialize it there since the API imports its types.
+COPY --from=build --chown=nodejs:nodejs /repo/packages/shared-types/ /packages/shared-types
+
+USER nodejs
+
+EXPOSE 80
+CMD ["node", "dist/main"]
