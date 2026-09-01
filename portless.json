@@ -1,0 +1,6 @@
+{
+  "apps": {
+    "apps/web": { "name": "web", "script": "dev:app" },
+    "apps/api": { "name": "api", "script": "dev:app" }
+  }
+}

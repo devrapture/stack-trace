@@ -35,8 +35,7 @@ jobs:
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
       - run: bun run format:check
-      - run: bun run lint
-      - run: bun run typecheck
+      - run: bunx turbo run lint typecheck
 
   unit:
     name: Unit tests + coverage
@@ -57,11 +56,11 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run test:cov
+      - run: bunx turbo run test:cov --filter=api
       - uses: actions/upload-artifact@v7
         with:
           name: coverage
-          path: coverage/
+          path: apps/api/coverage/
           if-no-files-found: error
           retention-days: 7
 
@@ -84,12 +83,12 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run build
-      - run: test -f dist/main.js
+      - run: bunx turbo run build
+      - run: test -f apps/api/dist/main.js
       - uses: actions/upload-artifact@v7
         with:
           name: dist
-          path: dist/
+          path: apps/api/dist/
           if-no-files-found: error
           retention-days: 7
 
@@ -109,7 +108,7 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run test:e2e
+      - run: bunx turbo run test:e2e --filter=api
       # When Prisma + Postgres land, provision a service container here:
       #   services:
       #     postgres:
@@ -144,7 +143,7 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run cli -- doctor
+      - run: bunx turbo run build --filter=shared-types --filter=api && bun run --filter api cli -- doctor
 
   audit:
     name: Dependency audit
