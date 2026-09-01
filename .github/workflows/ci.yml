@@ -143,7 +143,7 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run --filter api cli -- doctor
+      - run: bunx turbo run build --filter=shared-types --filter=api && bun run --filter api cli -- doctor
 
   audit:
     name: Dependency audit
