@@ -14,6 +14,7 @@ permissions:
 
 env:
   BUN_VERSION: '1.3.14'
+  NODE_VERSION: '24'
   CI: 'true'
   HUSKY: '0'
 
@@ -34,8 +35,7 @@ jobs:
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
       - run: bun run format:check
-      - run: bun run lint
-      - run: bun run typecheck
+      - run: bunx turbo run lint typecheck
 
   unit:
     name: Unit tests + coverage
@@ -56,11 +56,11 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run test:cov
-      - uses: actions/upload-artifact@v4
+      - run: bunx turbo run test:cov --filter=api
+      - uses: actions/upload-artifact@v7
         with:
           name: coverage
-          path: coverage/
+          path: apps/api/coverage/
           if-no-files-found: error
           retention-days: 7
 
@@ -83,12 +83,12 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run build
-      - run: test -f dist/main.js
-      - uses: actions/upload-artifact@v4
+      - run: bunx turbo run build
+      - run: test -f apps/api/dist/main.js
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
-          path: dist/
+          path: apps/api/dist/
           if-no-files-found: error
           retention-days: 7
 
@@ -108,7 +108,7 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run test:e2e
+      - run: bunx turbo run test:e2e --filter=api
       # When Prisma + Postgres land, provision a service container here:
       #   services:
       #     postgres:
@@ -133,6 +133,9 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           bun-version: ${{ env.BUN_VERSION }}
+      - uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
       - uses: actions/cache@v4
         with:
           path: ~/.bun/install/cache
@@ -140,7 +143,7 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bun run cli -- doctor
+      - run: bunx turbo run build --filter=shared-types --filter=api && bun run --filter api cli -- doctor
 
   audit:
     name: Dependency audit
@@ -157,9 +160,9 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - name: Gitleaks
-        run: |
-          docker run --rm \
-            -v "${{ github.workspace }}:/src" \
-            gitleaks/gitleaks:latest detect \
-            --source=/src --redact --no-banner --exit-code=1
+        uses: gitleaks/gitleaks-action@v2
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
