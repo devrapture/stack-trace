@@ -57,7 +57,7 @@ jobs:
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
       - run: bunx turbo run test:cov --filter=api
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: coverage
           path: apps/api/coverage/
@@ -85,7 +85,7 @@ jobs:
       - run: bun install --frozen-lockfile
       - run: bunx turbo run build
       - run: test -f apps/api/dist/main.js
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         with:
           name: dist
           path: apps/api/dist/
