@@ -21,6 +21,12 @@
   },
   "packageManager": "bun@1.3.14",
   "private": true,
+  "overrides": {
+    "mysql2": "3.24.3",
+    "deepmerge-ts": "8.0.2",
+    "lodash": "4.18.1",
+    "valibot": "1.4.2"
+  },
   "scripts": {
     "db:generate": "bun run --filter api db:generate",
     "db:validate": "bun run --filter api db:validate",
