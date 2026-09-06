@@ -4,7 +4,10 @@ import {
   DatabaseReadiness,
 } from './database-health-probe.js';
 import { PrismaService } from './prisma.service.js';
-import { CURRENT_SCHEMA_VERSION } from './schema-version.js';
+import {
+  CURRENT_SCHEMA_MIGRATION_NAME,
+  CURRENT_SCHEMA_VERSION,
+} from './schema-version.js';
 
 @Injectable()
 export class PrismaDatabaseHealthProbe implements DatabaseHealthProbe {
@@ -34,6 +37,7 @@ export class PrismaDatabaseHealthProbe implements DatabaseHealthProbe {
         {
           where: {
             semanticVersion: CURRENT_SCHEMA_VERSION,
+            migrationName: CURRENT_SCHEMA_MIGRATION_NAME,
           },
           select: {
             semanticVersion: true,
