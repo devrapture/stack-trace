@@ -1,7 +1,12 @@
 import { FactoryProvider, Module } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import { ValidatedEnvironment, validateEnvironment } from './environment.js';
 import { APP_CONFIG, AppConfig, createAppConfig } from './app-config.js';
+import {
+  createDatabaseConfig,
+  DATABASE_CONFIG,
+  DatabaseConfig,
+} from './database-config.js';
+import { ValidatedEnvironment, validateEnvironment } from './environment.js';
 
 const readValidatedEnvironment = (
   configService: ConfigService<ValidatedEnvironment, true>,
@@ -28,6 +33,31 @@ const readValidatedEnvironment = (
     CORS_ORIGINS: configService.getOrThrow('CORS_ORIGINS', {
       infer: true,
     }),
+
+    DATABASE_URL: configService.getOrThrow('DATABASE_URL', {
+      infer: true,
+    }),
+    DATABASE_POOL_MAX: configService.getOrThrow('DATABASE_POOL_MAX', {
+      infer: true,
+    }),
+    DATABASE_CONNECTION_TIMEOUT_MS: configService.getOrThrow(
+      'DATABASE_CONNECTION_TIMEOUT_MS',
+      {
+        infer: true,
+      },
+    ),
+    DATABASE_IDLE_TIMEOUT_MS: configService.getOrThrow(
+      'DATABASE_IDLE_TIMEOUT_MS',
+      {
+        infer: true,
+      },
+    ),
+    DATABASE_MAX_LIFETIME_SECONDS: configService.getOrThrow(
+      'DATABASE_MAX_LIFETIME_SECONDS',
+      {
+        infer: true,
+      },
+    ),
   };
 };
 
@@ -42,15 +72,26 @@ const appConfigProvider: FactoryProvider<AppConfig> = {
   },
 };
 
+const databaseConfigProvider: FactoryProvider<DatabaseConfig> = {
+  provide: DATABASE_CONFIG,
+  inject: [ConfigService],
+  useFactory: (
+    configService: ConfigService<ValidatedEnvironment, true>,
+  ): DatabaseConfig => {
+    const environment = readValidatedEnvironment(configService);
+    return createDatabaseConfig(environment);
+  },
+};
+
 @Module({
   imports: [
     ConfigModule.forRoot({
       cache: true,
-      ignoreEnvFile: true,
+      // ignoreEnvFile: true,
       validate: validateEnvironment,
     }),
   ],
-  providers: [appConfigProvider],
-  exports: [APP_CONFIG],
+  providers: [appConfigProvider, databaseConfigProvider],
+  exports: [APP_CONFIG, DATABASE_CONFIG],
 })
 export class PlatformConfigModule {}

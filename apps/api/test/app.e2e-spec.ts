@@ -31,7 +31,8 @@ describe('Health endpoints (e2e)', () => {
       .expect(200)
       .expect((res) => {
         expect(res.body.status).toBe('ok');
-        expect(res.body.checks.database).toBe('not-configured');
+        expect(res.body.checks.database).toBe('up');
+        expect(res.body.checks.schema).toBe('up');
       });
   });
 });

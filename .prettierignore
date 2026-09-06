@@ -6,5 +6,8 @@ node_modules/
 .turbo/
 src/generated/
 prisma/migrations/
+apps/api/.agents/
+apps/api/src/generated/
+apps/api/prisma/migrations/
 apps/web/.next/
 apps/web/next-env.d.ts

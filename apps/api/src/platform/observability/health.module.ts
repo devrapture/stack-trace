@@ -1,10 +1,11 @@
 import { Module } from '@nestjs/common';
-import { HealthService } from './health.service.js';
-import { HealthController } from './health.controller.js';
 import { ClockModule } from '../clock/clock.module.js';
+import { DatabaseModule } from '../database/database.module.js';
+import { HealthController } from './health.controller.js';
+import { HealthService } from './health.service.js';
 
 @Module({
-  imports: [ClockModule],
+  imports: [ClockModule, DatabaseModule],
   controllers: [HealthController],
   providers: [HealthService],
 })

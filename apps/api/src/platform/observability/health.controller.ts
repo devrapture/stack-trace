@@ -1,4 +1,12 @@
-import { Controller, Get, Version, VERSION_NEUTRAL } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  HttpStatus,
+  Res,
+  Version,
+  VERSION_NEUTRAL,
+} from '@nestjs/common';
+import { type FastifyReply } from 'fastify';
 import { HealthService } from './health.service.js';
 
 @Controller()
@@ -13,7 +21,16 @@ export class HealthController {
 
   @Get('/readyz')
   @Version(VERSION_NEUTRAL)
-  getReadiness() {
-    return this.healthService.getReadiness();
+  async getReadiness(
+    @Res({
+      passthrough: true,
+    })
+    reply: FastifyReply,
+  ) {
+    const response = await this.healthService.getReadiness();
+    if (response.status === 'unavailable') {
+      reply.status(HttpStatus.SERVICE_UNAVAILABLE);
+    }
+    return response;
   }
 }
