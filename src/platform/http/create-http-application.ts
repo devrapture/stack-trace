@@ -13,36 +13,38 @@ import { configHttpApplication } from './configure-http-application.js';
 import { REQUEST_ID_HEADER, resolveRequestId } from './request-id.js';
 
 const ONE_MEBIBYTE = 1_048_576;
+type HttpApplicationFactory = Pick<typeof NestFactory, 'create'>;
 
-export const createHttpApplication =
-  async (): Promise<NestFastifyApplication> => {
-    const app = await NestFactory.create<NestFastifyApplication>(
-      AppModule,
-      new FastifyAdapter({
-        bodyLimit: ONE_MEBIBYTE,
-        trustProxy: false,
-        genReqId: (req: { headers: IncomingHttpHeaders }) =>
-          resolveRequestId(req.headers[REQUEST_ID_HEADER]),
-      }),
-      {
-        abortOnError: true,
-        bufferLogs: true,
-        rawBody: true,
-      },
-    );
+export const createHttpApplication = async (
+  nestFactory: HttpApplicationFactory = NestFactory,
+): Promise<NestFastifyApplication> => {
+  const app = await nestFactory.create<NestFastifyApplication>(
+    AppModule,
+    new FastifyAdapter({
+      bodyLimit: ONE_MEBIBYTE,
+      trustProxy: false,
+      genReqId: (req: { headers: IncomingHttpHeaders }) =>
+        resolveRequestId(req.headers[REQUEST_ID_HEADER]),
+    }),
+    {
+      abortOnError: true,
+      bufferLogs: true,
+      rawBody: true,
+    },
+  );
 
-    app.enableVersioning({
-      type: VersioningType.URI,
-      defaultVersion: '1',
-    });
+  app.enableVersioning({
+    type: VersioningType.URI,
+    defaultVersion: '1',
+  });
 
-    app.useLogger(app.get(PinoNestLogger));
+  app.useLogger(app.get(PinoNestLogger));
 
-    const logger = await app.resolve<PinoLogger>(PinoLogger);
-    logger.setContext('httpAccessLog');
+  const logger = await app.resolve<PinoLogger>(PinoLogger);
+  logger.setContext('httpAccessLog');
 
-    const runtimeConfig = app.get(APP_CONFIG);
-    configHttpApplication(app, runtimeConfig, logger);
+  const runtimeConfig = app.get(APP_CONFIG);
+  configHttpApplication(app, runtimeConfig, logger);
 
-    return app;
-  };
+  return app;
+};
