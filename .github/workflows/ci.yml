@@ -17,6 +17,7 @@ env:
   NODE_VERSION: '24'
   CI: 'true'
   HUSKY: '0'
+  DATABASE_URL: postgresql://${{ vars.POSTGRES_USER != '' && vars.POSTGRES_USER || 'stack_trace' }}:${{ secrets.POSTGRES_PASSWORD != '' && secrets.POSTGRES_PASSWORD || 'ci-only-secret' }}@127.0.0.1:5432/${{ vars.POSTGRES_DB != '' && vars.POSTGRES_DB || 'stack_trace' }}
 
 jobs:
   check:
@@ -35,7 +36,8 @@ jobs:
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
       - run: bun run format:check
-      - run: bunx turbo run lint typecheck
+      - run: bun run lint
+      - run: bun run typecheck
 
   unit:
     name: Unit tests + coverage
@@ -56,11 +58,11 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bunx turbo run test:cov --filter=api
+      - run: bun run test:cov
       - uses: actions/upload-artifact@v7
         with:
           name: coverage
-          path: apps/api/coverage/
+          path: coverage/
           if-no-files-found: error
           retention-days: 7
 
@@ -83,12 +85,12 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bunx turbo run build
-      - run: test -f apps/api/dist/main.js
+      - run: bun run build
+      - run: test -f dist/main.js
       - uses: actions/upload-artifact@v7
         with:
           name: dist
-          path: apps/api/dist/
+          path: dist/
           if-no-files-found: error
           retention-days: 7
 
@@ -96,6 +98,20 @@ jobs:
     name: E2E tests
     needs: unit
     runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:18.6-bookworm
+        env:
+          POSTGRES_DB: ${{ vars.POSTGRES_DB != '' && vars.POSTGRES_DB || 'stack_trace' }}
+          POSTGRES_USER: ${{ vars.POSTGRES_USER != '' && vars.POSTGRES_USER || 'stack_trace' }}
+          POSTGRES_PASSWORD: ${{ secrets.POSTGRES_PASSWORD != '' && secrets.POSTGRES_PASSWORD || 'ci-only-secret' }}
+        ports:
+          - '5432:5432'
+        options: >-
+          --health-cmd "pg_isready -U ${{ vars.POSTGRES_USER != '' && vars.POSTGRES_USER || 'stack_trace' }} -d ${{ vars.POSTGRES_DB != '' && vars.POSTGRES_DB || 'stack_trace' }}"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
     steps:
       - uses: actions/checkout@v4
       - uses: oven-sh/setup-bun@v2
@@ -108,21 +124,22 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bunx turbo run test:e2e --filter=api
-      # When Prisma + Postgres land, provision a service container here:
-      #   services:
-      #     postgres:
-      #       image: postgres:18.6-bookworm
-      #       env:
-      #         POSTGRES_DB: stack_trace
-      #         POSTGRES_USER: stack_trace
-      #         POSTGRES_PASSWORD: ci-only-secret
-      #       ports:
-      #         - '5432:5432'
-      #       options: >-
-      #         --health-cmd "pg_isready -U stack_trace -d stack_trace"
-      #         --health-interval 5s --health-timeout 5s --health-retries 10
-      # then run: bunx prisma migrate deploy
+      - name: Wait for PostgreSQL
+        run: |
+          attempts=30
+          until (echo > /dev/tcp/127.0.0.1/5432) >/dev/null 2>&1; do
+            attempts=$((attempts - 1))
+            if [ "$attempts" -le 0 ]; then
+              echo "PostgreSQL did not become ready in time" >&2
+              exit 1
+            fi
+            sleep 2
+          done
+          echo "PostgreSQL is ready"
+      - name: Apply database migrations
+        run: bun run db:migrate:deploy
+      - name: Run E2E tests
+        run: bun run test:e2e
 
   doctor:
     name: DI wiring check (doctor)
@@ -143,7 +160,7 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bunx turbo run build --filter=shared-types --filter=api && bun run --filter api cli -- doctor
+      - run: bun run cli:doctor
 
   audit:
     name: Dependency audit
