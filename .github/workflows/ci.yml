@@ -36,7 +36,8 @@ jobs:
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
       - run: bun run format:check
-      - run: bunx turbo run lint typecheck
+      - run: bun run lint
+      - run: bun run typecheck
 
   unit:
     name: Unit tests + coverage
@@ -57,11 +58,11 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bunx turbo run test:cov --filter=api
+      - run: bun run test:cov
       - uses: actions/upload-artifact@v7
         with:
           name: coverage
-          path: apps/api/coverage/
+          path: coverage/
           if-no-files-found: error
           retention-days: 7
 
@@ -84,12 +85,12 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bunx turbo run build
-      - run: test -f apps/api/dist/main.js
+      - run: bun run build
+      - run: test -f dist/main.js
       - uses: actions/upload-artifact@v7
         with:
           name: dist
-          path: apps/api/dist/
+          path: dist/
           if-no-files-found: error
           retention-days: 7
 
@@ -138,7 +139,7 @@ jobs:
       - name: Apply database migrations
         run: bun run db:migrate:deploy
       - name: Run E2E tests
-        run: bunx turbo run test:e2e --filter=api
+        run: bun run test:e2e
 
   doctor:
     name: DI wiring check (doctor)
@@ -159,7 +160,7 @@ jobs:
           restore-keys: |
             bun-${{ runner.os }}-
       - run: bun install --frozen-lockfile
-      - run: bunx turbo run build --filter=shared-types --filter=api && bun run --filter api cli -- doctor
+      - run: bun run cli:doctor
 
   audit:
     name: Dependency audit

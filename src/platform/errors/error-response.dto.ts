@@ -1,4 +1,4 @@
-import type { ApiError, ErrorResponse } from 'shared-types';
+import type { ApiError, ErrorResponse } from '../../contracts/errors.js';
 import { type ErrorDetails } from './error-details.js';
 
 export class ApiErrorDto implements ApiError {
