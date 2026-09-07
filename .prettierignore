@@ -2,12 +2,5 @@ bun.lock
 coverage/
 dist/
 node_modules/
-.next/
-.turbo/
 src/generated/
 prisma/migrations/
-apps/api/.agents/
-apps/api/src/generated/
-apps/api/prisma/migrations/
-apps/web/.next/
-apps/web/next-env.d.ts

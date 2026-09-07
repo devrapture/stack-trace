@@ -2,7 +2,7 @@ import type {
   HealthCheckState,
   HealthChecks,
   HealthResponse,
-} from 'shared-types';
+} from '../../contracts/health.js';
 
 export type { HealthCheckState, HealthChecks };
 

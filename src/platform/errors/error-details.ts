@@ -1,4 +1,4 @@
-import type { ErrorDetails } from 'shared-types';
+import type { ErrorDetails } from '../../contracts/errors.js';
 
 export type { ErrorDetails };
 
