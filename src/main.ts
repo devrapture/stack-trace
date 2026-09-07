@@ -1,10 +1,11 @@
+import { NestFactory } from '@nestjs/core';
 import { PinoLogger } from 'nestjs-pino';
 import { APP_CONFIG, AppConfig } from './platform/config/app-config.js';
 import { formatFatalError } from './platform/errors/format-fatal-error.js';
 import { createHttpApplication } from './platform/http/create-http-application.js';
 
 async function bootstrap() {
-  const app = await createHttpApplication();
+  const app = await createHttpApplication(NestFactory);
 
   const config = app.get<AppConfig>(APP_CONFIG);
   app.enableShutdownHooks();
