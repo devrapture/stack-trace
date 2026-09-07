@@ -22,6 +22,12 @@ export interface ValidatedEnvironment {
   readonly TRUST_PROXY_HOPS: number;
   readonly HTTP_BODY_LIMIT_BYTES: number;
   readonly CORS_ORIGINS: string;
+
+  readonly DATABASE_URL: string;
+  readonly DATABASE_POOL_MAX: number;
+  readonly DATABASE_CONNECTION_TIMEOUT_MS: number;
+  readonly DATABASE_IDLE_TIMEOUT_MS: number;
+  readonly DATABASE_MAX_LIFETIME_SECONDS: number;
 }
 
 const MAXIMUM_BODY_LIMIT_BYTES = 5 * 1_024 * 1_024; // 5MiB
@@ -42,6 +48,29 @@ const environmentSchema = Joi.object<ValidatedEnvironment>({
     .max(MAXIMUM_BODY_LIMIT_BYTES)
     .default(1_048_576),
   CORS_ORIGINS: Joi.string().trim().allow('').max(4_096).default(''),
+
+  DATABASE_URL: Joi.string()
+    .trim()
+    .uri({
+      scheme: ['postgresql', 'postgres'],
+    })
+    .required(),
+  DATABASE_POOL_MAX: Joi.number().integer().min(1).max(100).default(10),
+  DATABASE_CONNECTION_TIMEOUT_MS: Joi.number()
+    .integer()
+    .min(100)
+    .max(30_000)
+    .default(5_000),
+  DATABASE_IDLE_TIMEOUT_MS: Joi.number()
+    .integer()
+    .min(1_000)
+    .max(300_000)
+    .default(10_000),
+  DATABASE_MAX_LIFETIME_SECONDS: Joi.number()
+    .integer()
+    .min(0)
+    .max(3_600)
+    .default(0),
 }).unknown(true);
 
 const isRecord = (value: unknown): value is Record<string, unknown> =>
@@ -96,6 +125,12 @@ export const validateEnvironment = (
   const bodyLimitBytes = value['HTTP_BODY_LIMIT_BYTES'];
   const corsOrigins = value['CORS_ORIGINS'];
 
+  const databaseUrl = value['DATABASE_URL'];
+  const databasePoolMax = value['DATABASE_POOL_MAX'];
+  const databaseConnectionTimeoutMs = value['DATABASE_CONNECTION_TIMEOUT_MS'];
+  const databaseIdleTimeoutMs = value['DATABASE_IDLE_TIMEOUT_MS'];
+  const databaseMaxLifetimeSeconds = value['DATABASE_MAX_LIFETIME_SECONDS'];
+
   if (
     !isNodeEnvironment(nodeEnvironment) ||
     typeof port !== 'number' ||
@@ -103,7 +138,12 @@ export const validateEnvironment = (
     typeof logPretty !== 'boolean' ||
     typeof trustProxyHops !== 'number' ||
     typeof bodyLimitBytes !== 'number' ||
-    typeof corsOrigins !== 'string'
+    typeof corsOrigins !== 'string' ||
+    typeof databaseUrl !== 'string' ||
+    typeof databasePoolMax !== 'number' ||
+    typeof databaseConnectionTimeoutMs !== 'number' ||
+    typeof databaseIdleTimeoutMs !== 'number' ||
+    typeof databaseMaxLifetimeSeconds !== 'number'
   ) {
     throw new Error('Environment validation produced an invalid typed result.');
   }
@@ -120,5 +160,10 @@ export const validateEnvironment = (
     TRUST_PROXY_HOPS: trustProxyHops,
     HTTP_BODY_LIMIT_BYTES: bodyLimitBytes,
     CORS_ORIGINS: corsOrigins,
+    DATABASE_URL: databaseUrl,
+    DATABASE_POOL_MAX: databasePoolMax,
+    DATABASE_CONNECTION_TIMEOUT_MS: databaseConnectionTimeoutMs,
+    DATABASE_IDLE_TIMEOUT_MS: databaseIdleTimeoutMs,
+    DATABASE_MAX_LIFETIME_SECONDS: databaseMaxLifetimeSeconds,
   });
 };

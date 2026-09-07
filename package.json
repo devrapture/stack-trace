@@ -1,12 +1,40 @@
 {
   "name": "stack-trace",
-  "private": true,
+  "devDependencies": {
+    "api": "workspace:*",
+    "dotenv": "^17.4.2",
+    "husky": "^9.1.7",
+    "lint-staged": "^17.4.1",
+    "oxlint": "^1.58.0",
+    "portless": "^0.15.6",
+    "prettier": "^3.4.2",
+    "turbo": "^2.5.4"
+  },
+  "lint-staged": {
+    "apps/api/**/*.ts": [
+      "oxlint --config apps/api/oxlint.json --fix",
+      "prettier --write"
+    ],
+    "*.{ts,tsx,js,mjs,json,md,yml,yaml,css}": [
+      "prettier --write"
+    ]
+  },
   "packageManager": "bun@1.3.14",
-  "workspaces": [
-    "apps/*",
-    "packages/*"
-  ],
+  "private": true,
+  "overrides": {
+    "mysql2": "3.24.3",
+    "deepmerge-ts": "8.0.2",
+    "lodash": "4.18.1",
+    "valibot": "1.4.2"
+  },
   "scripts": {
+    "db:generate": "bun run --filter api db:generate",
+    "db:validate": "bun run --filter api db:validate",
+    "db:migrate:create": "bun run --filter api db:migrate:create",
+    "db:migrate:dev": "bun run --filter api db:migrate:dev",
+    "db:migrate:deploy": "bun run --filter api db:migrate:deploy",
+    "db:migrate:status": "bun run --filter api db:migrate:status",
+    "db:migrate:diff": "bun run --filter api db:migrate:diff",
     "dev": "turbo run dev",
     "dev:api": "bun run --filter api start:dev",
     "dev:web": "bun run --filter web dev",
@@ -29,21 +57,8 @@
     "db:shell": "docker compose exec postgres psql -U stack_trace -d stack_trace",
     "prepare": "husky"
   },
-  "devDependencies": {
-    "husky": "^9.1.7",
-    "lint-staged": "^17.4.1",
-    "oxlint": "^1.58.0",
-    "portless": "^0.15.6",
-    "prettier": "^3.4.2",
-    "turbo": "^2.5.4"
-  },
-  "lint-staged": {
-    "apps/api/**/*.ts": [
-      "oxlint --config apps/api/oxlint.json --fix",
-      "prettier --write"
-    ],
-    "*.{ts,tsx,js,mjs,json,md,yml,yaml,css}": [
-      "prettier --write"
-    ]
-  }
+  "workspaces": [
+    "apps/*",
+    "packages/*"
+  ]
 }

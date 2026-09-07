@@ -8,7 +8,7 @@ export type { HealthCheckState, HealthChecks };
 
 export class HealthResponseDto implements HealthResponse {
   constructor(
-    readonly status: 'ok',
+    readonly status: 'ok' | 'unavailable',
     readonly service: 'stack-track-api',
     readonly checked_at: string,
     readonly uptime_seconds: number,

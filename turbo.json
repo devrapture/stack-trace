@@ -18,7 +18,9 @@
       "dependsOn": ["^build"]
     },
     "test:e2e": {
-      "dependsOn": ["^build"]
+      "dependsOn": ["^build"],
+      "env": ["DATABASE_URL"],
+      "cache": false
     },
     "test:cov": {
       "dependsOn": ["^build"],
