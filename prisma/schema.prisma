@@ -1,0 +1,22 @@
+generator client {
+  provider               = "prisma-client"
+  output                 = "../src/generated/prisma"
+  runtime                = "nodejs"
+  moduleFormat           = "esm"
+  generatedFileExtension = "ts"
+  importFileExtension    = "js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model SchemaMigration {
+  semanticVersion String   @id @map("semantic_version") @db.VarChar(32)
+  migrationName   String   @unique(map: "schema_migrations_migration_name_key") @map("migration_name") @db.VarChar(255)
+  appliedAt       DateTime @default(now()) @map("applied_at") @db.Timestamptz(6)
+  applicationBuild String? @map("application_build") @db.VarChar(128)
+  notes            String?
+
+  @@map("schema_migrations")
+}

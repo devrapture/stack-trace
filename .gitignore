@@ -3,9 +3,6 @@ dist
 node_modules
 build
 *.tsbuildinfo
-.next
-.turbo
-out
 
 # Logs
 logs
