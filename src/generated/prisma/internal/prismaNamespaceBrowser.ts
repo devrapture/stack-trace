@@ -51,7 +51,10 @@ export const AnyNull = runtime.AnyNull
 
 
 export const ModelName = {
-  SchemaMigration: 'SchemaMigration'
+  SchemaMigration: 'SchemaMigration',
+  User: 'User',
+  UserEmail: 'UserEmail',
+  AuthIdentity: 'AuthIdentity'
 } as const
 
 export type ModelName = (typeof ModelName)[keyof typeof ModelName]
@@ -79,6 +82,50 @@ export const SchemaMigrationScalarFieldEnum = {
 } as const
 
 export type SchemaMigrationScalarFieldEnum = (typeof SchemaMigrationScalarFieldEnum)[keyof typeof SchemaMigrationScalarFieldEnum]
+
+
+export const UserScalarFieldEnum = {
+  id: 'id',
+  publicId: 'publicId',
+  status: 'status',
+  displayName: 'displayName',
+  activatedAt: 'activatedAt',
+  disabledAt: 'disabledAt',
+  deletedAt: 'deletedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserScalarFieldEnum = (typeof UserScalarFieldEnum)[keyof typeof UserScalarFieldEnum]
+
+
+export const UserEmailScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  displayEmail: 'displayEmail',
+  normalizedEmail: 'normalizedEmail',
+  isPrimary: 'isPrimary',
+  verifiedAt: 'verifiedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type UserEmailScalarFieldEnum = (typeof UserEmailScalarFieldEnum)[keyof typeof UserEmailScalarFieldEnum]
+
+
+export const AuthIdentityScalarFieldEnum = {
+  id: 'id',
+  userId: 'userId',
+  identityType: 'identityType',
+  status: 'status',
+  activatedAt: 'activatedAt',
+  disabledAt: 'disabledAt',
+  lastUsedAt: 'lastUsedAt',
+  createdAt: 'createdAt',
+  updatedAt: 'updatedAt'
+} as const
+
+export type AuthIdentityScalarFieldEnum = (typeof AuthIdentityScalarFieldEnum)[keyof typeof AuthIdentityScalarFieldEnum]
 
 
 export const SortOrder = {

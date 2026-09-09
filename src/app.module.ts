@@ -4,6 +4,8 @@ import { PlatformConfigModule } from './platform/config/platform-config.module.j
 import { PlatformHttpModule } from './platform/http/platform-http.module.js';
 import { PlatformLoggingModule } from './platform/logging/platform-logging.module.js';
 import { ObservabilityModule } from './platform/observability/health.module.js';
+import { UsersModule } from './identity/users/users.module.js';
+import { AuthIdentitiesModule } from './identity/auth/auth-identities.module.js';
 
 export const { ObserveModule, ObserveInstrument } = createObserveModule();
 
@@ -20,6 +22,8 @@ export const { ObserveModule, ObserveInstrument } = createObserveModule();
     PlatformLoggingModule,
     PlatformHttpModule,
     ObservabilityModule,
+    UsersModule,
+    AuthIdentitiesModule,
   ],
 })
 export class AppModule {}

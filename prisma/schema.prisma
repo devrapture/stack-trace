@@ -12,11 +12,89 @@ datasource db {
 }
 
 model SchemaMigration {
-  semanticVersion String   @id @map("semantic_version") @db.VarChar(32)
-  migrationName   String   @unique(map: "schema_migrations_migration_name_key") @map("migration_name") @db.VarChar(255)
-  appliedAt       DateTime @default(now()) @map("applied_at") @db.Timestamptz(6)
-  applicationBuild String? @map("application_build") @db.VarChar(128)
+  semanticVersion  String   @id @map("semantic_version") @db.VarChar(32)
+  migrationName    String   @unique(map: "schema_migrations_migration_name_key") @map("migration_name") @db.VarChar(255)
+  appliedAt        DateTime @default(now()) @map("applied_at") @db.Timestamptz(6)
+  applicationBuild String?  @map("application_build") @db.VarChar(128)
   notes            String?
 
   @@map("schema_migrations")
+}
+
+enum UserStatus {
+  pending
+  active
+  disabled
+  deleted
+}
+
+enum AuthIdentityType {
+  password
+  google
+  github
+}
+
+enum AuthIdentityStatus {
+  pending
+  active
+  disabled
+}
+
+model User {
+  id       String @id() @default(uuid()) @db.Uuid
+  publicId String @unique(map: "users_public_id_key") @default(uuid()) @map("public_id") @db.Uuid
+
+  status      UserStatus @default(pending)
+  displayName String?    @map("display_name") @db.VarChar(80)
+
+  activatedAt DateTime? @map("activated_at") @db.Timestamptz(6)
+  disabledAt  DateTime? @map("disabled_at") @db.Timestamptz(6)
+  deletedAt   DateTime? @map("deleted_at") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+
+  email          UserEmail[]
+  authIdentities AuthIdentity[]
+
+  @@index([status], map: "user_status_idx")
+  @@map("users")
+}
+
+model UserEmail {
+  id     String @id() @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+
+  displayEmail    String @map("display_email") @db.VarChar(320)
+  normalizedEmail String @unique(map: "user_emails_normalized_email_key") @map("normalized_email") @db.VarChar(254)
+
+  isPrimary Boolean @default(false) @map("is_primary")
+
+  verifiedAt DateTime? @map("verified_at") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz(6)
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade, onUpdate: Cascade)
+
+  @@index([userId], map: "user_emails_user_id_idx")
+  @@map("user_emails")
+}
+
+model AuthIdentity {
+  id     String @id() @default(uuid()) @db.Uuid
+  userId String @map("user_id") @db.Uuid
+
+  identityType AuthIdentityType   @map("identity_type")
+  status       AuthIdentityStatus @default(pending)
+
+  activatedAt DateTime? @map("activated_at") @db.Timestamptz(6)
+  disabledAt  DateTime? @map("disabled_at") @db.Timestamptz(6)
+  lastUsedAt  DateTime? @map("last_used_at") @db.Timestamptz(6)
+
+  createdAt DateTime @default(now()) @map("created_at") @db.Timestamptz()
+  updatedAt DateTime @updatedAt @map("updated_at") @db.Timestamptz(6)
+  user      User     @relation(fields: [userId], references: [id])
+
+  @@unique([userId, identityType], map: "auth_identities_user_id_identity_type_key")
+  @@map("auth_identities")
 }

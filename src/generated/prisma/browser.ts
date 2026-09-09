@@ -22,3 +22,18 @@ export * from './enums.js';
  * 
  */
 export type SchemaMigration = Prisma.SchemaMigrationModel
+/**
+ * Model User
+ * 
+ */
+export type User = Prisma.UserModel
+/**
+ * Model UserEmail
+ * 
+ */
+export type UserEmail = Prisma.UserEmailModel
+/**
+ * Model AuthIdentity
+ * 
+ */
+export type AuthIdentity = Prisma.AuthIdentityModel
