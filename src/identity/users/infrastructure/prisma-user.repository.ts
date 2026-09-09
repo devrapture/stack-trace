@@ -106,7 +106,6 @@ export class PrismaUserRepository implements UserRepository {
     return Object.freeze({
       id: row.id,
       userId: row.userId,
-      displayName: row.displayEmail,
       displayEmail: row.displayEmail,
       normalizedEmail: row.normalizedEmail,
       isPrimary: row.isPrimary,

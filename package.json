@@ -12,6 +12,7 @@
   "packageManager": "bun@1.3.14",
   "overrides": {
     "mysql2": "3.24.3",
+    "multer": "^2.3.0",
     "deepmerge-ts": "8.0.2",
     "lodash": "4.18.1",
     "valibot": "1.4.2"

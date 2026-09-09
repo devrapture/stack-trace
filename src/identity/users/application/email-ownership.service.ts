@@ -6,7 +6,7 @@ import {
 import { EmailOwnershipSnapshot } from '../domain/user.js';
 import { USER_REPOSITORY, type UserRepository } from './user.repository.js';
 
-export interface EmailOwnernshipLookup {
+export interface EmailOwnershipLookup {
   readonly email: NormalizedEmailAddress;
   readonly ownership: EmailOwnershipSnapshot | null;
 }
@@ -16,9 +16,9 @@ export class EmailOwnershipService {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
-  ) {}
+  ) { }
 
-  async findOwnership(rawEmail: string): Promise<EmailOwnernshipLookup> {
+  async findOwnership(rawEmail: string): Promise<EmailOwnershipLookup> {
     const email = normalizeEmailAddress(rawEmail);
 
     const ownership =
