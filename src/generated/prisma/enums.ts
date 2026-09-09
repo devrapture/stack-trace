@@ -9,7 +9,29 @@
 * 🟢 You can import this file directly.
 */
 
+export const UserStatus = {
+  pending: 'pending',
+  active: 'active',
+  disabled: 'disabled',
+  deleted: 'deleted'
+} as const
+
+export type UserStatus = (typeof UserStatus)[keyof typeof UserStatus]
 
 
-// This file is empty because there are no enums in the schema.
-export {}
+export const AuthIdentityType = {
+  password: 'password',
+  google: 'google',
+  github: 'github'
+} as const
+
+export type AuthIdentityType = (typeof AuthIdentityType)[keyof typeof AuthIdentityType]
+
+
+export const AuthIdentityStatus = {
+  pending: 'pending',
+  active: 'active',
+  disabled: 'disabled'
+} as const
+
+export type AuthIdentityStatus = (typeof AuthIdentityStatus)[keyof typeof AuthIdentityStatus]
