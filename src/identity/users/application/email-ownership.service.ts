@@ -16,7 +16,7 @@ export class EmailOwnershipService {
   constructor(
     @Inject(USER_REPOSITORY)
     private readonly userRepository: UserRepository,
-  ) { }
+  ) {}
 
   async findOwnership(rawEmail: string): Promise<EmailOwnershipLookup> {
     const email = normalizeEmailAddress(rawEmail);
